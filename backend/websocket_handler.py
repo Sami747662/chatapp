@@ -4,7 +4,7 @@ from typing import Dict, Optional, List
 from jose import jwt, JWTError
 from .auth import SECRET_KEY, ALGORITHM
 from .database import SessionLocal
-from .models import User, Message, ChatRoom, GroupParticipant, MessageStatus
+from .models import User, Message, ChatRoom, GroupParticipant
 from datetime import datetime
 import json
 import logging
@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 
 class ConnectionManager:
     def __init__(self):
-        # Maps user_id -> WebSocket
         self.active_connections: Dict[int, WebSocket] = {}
 
     async def connect(self, websocket: WebSocket, user_id: int):
@@ -71,20 +70,18 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
                 
                 db = SessionLocal()
                 try:
-                    # Persist message
                     msg = Message(room_id=room_id, sender_id=user_id, content=content)
                     db.add(msg)
                     db.commit()
                     db.refresh(msg)
                     
-                    # Routing Logic: Find all participants in the room
                     room = db.query(ChatRoom).filter_by(id=room_id).first()
                     recipient_ids = []
                     
                     if room:
                         if room.chat_type == 'direct':
                             recipient_ids = [room.user1_id, room.user2_id]
-                        else: # group
+                        else:
                             participants = db.query(GroupParticipant).filter_by(group_id=room_id).all()
                             recipient_ids = [p.user_id for p in participants]
                     
@@ -99,21 +96,14 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
                         }
                     }
                     
-                    # Deliver to all active participants (including self for sync)
                     for rid in recipient_ids:
                         if rid:
                             await manager.send_to_user(rid, payload)
                             
                 finally:
                     db.close()
-            
-            elif data['type'] == 'typing':
-                # Broadcast typing status to others in room
-                # Logic simplified: assuming client sends room_id
-                pass
-                
     except WebSocketDisconnect:
         await manager.disconnect(user_id)
     except Exception as e:
-        logger.error(f"WS Exception for user {user_id}: {e}")
+        logger.error(f"WS Exception: {e}")
         await manager.disconnect(user_id)

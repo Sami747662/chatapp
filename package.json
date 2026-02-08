@@ -1,20 +1,20 @@
+
 {
-  "name": "gemini-powered-real-time-chat-pro",
-  "private": true,
-  "version": "0.0.0",
+  "name": "echo-protocol-frontend",
+  "module": "index.tsx",
   "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+  "devDependencies": {
+    "bun-types": "latest"
   },
   "dependencies": {
-
+    "@google/genai": "^0.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "lucide-react": "^0.284.0"
   },
-  "devDependencies": {
-    "@types/node": "^22.14.0",
-    
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+  "scripts": {
+    "dev": "bun x vite",
+    "build": "bun x vite build",
+    "preview": "bun x vite preview"
   }
 }

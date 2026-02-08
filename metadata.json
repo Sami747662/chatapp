@@ -1,0 +1,8 @@
+{
+  "name": "Gemini-Powered Real-time Chat Pro",
+  "description": "A high-performance real-time chat application featuring direct messaging, group chats, file sharing, and AI-powered assistance using Gemini. Built with FastAPI backend and React frontend.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
